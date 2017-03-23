@@ -1,6 +1,9 @@
 const assert = require('chai').assert
 const app = require('../server')
 const request = require('request')
+const environment = process.env.NODE_ENV || 'development';
+const configuration = require('../knexfile')[environment];
+const database = require('knex')(configuration);
 
 describe ('Server', () => {
   before(done => {
@@ -42,8 +45,9 @@ describe ('Server', () => {
   })
 
   describe('POST /api/foods', () => {
-    beforeEach(() => {
-      app.locals.foods = {}
+    beforeEach((done) => {
+      database.raw('TRUNCATE foods RESTART IDENTITY'
+      ).then(() => done());
     })
 
     it('should not return a 404', (done) => {
@@ -54,10 +58,12 @@ describe ('Server', () => {
       })
     })
 
-    it('should receive and store data', (done) => {
-      const food = { name: 'pineapple', calories: 10 }
-      this.request.post('/api/foods', { form: food }, (error, response) => {
+    xit('should receive and store data', (done) => {
+      const foodie = {food: { food_name: 'pineapple', calories: 10 }}
+      this.request.post('/api/foods', { form: foodie }, (error, response) => {
         if (error) { done(error) }
+        // console.log(food)
+        console.log(database)
         const secretCount = Object.keys(app.locals.foods).length
         assert.equal(secretCount, 1)
         done()
@@ -86,28 +92,38 @@ describe ('Server', () => {
   })
 
   describe('GET /api/foods/:name', () => {
-    beforeEach(() => {
-      app.locals.foods = {
-        "apple": 10
-      }
+    beforeEach((done) => {
+      database.raw(
+        'INSERT INTO foods (food_name, calories , created_at) VALUES (?, ?, ?)',
+        ["bananas", "90", new Date]
+      ).then(() => done());
     })
 
-    it('should return a 404 if resource is not found', (done) => {
-      this.request.get('/api/foods/2', (error, response) => {
+    afterEach((done) => {
+      database.raw('TRUNCATE foods RESTART IDENTITY')
+      .then(() => done());
+    })
+
+    it('should return 404 if resource is not found', (done) => {
+      this.request.get('/api/foods/5', (error, response) => {
         if (error) { done(error) }
         assert.equal(response.statusCode, 404)
-        assert.include(response.body, 'Not Found')
         done()
       })
     })
 
-    it('should return the name and calories if the resource is found', (done) => {
-      this.request.get('/api/foods/apple', (error, response) => {
+    it('should return the id and message from the resource found', (done) => {
+      this.request.get('/api/foods/1', (error, response) => {
         if (error) { done(error) }
-        assert.include(response.body, 'apple')
-        assert.include(response.body, 10)
-        assert.include(response.body, 'name')
-        assert.include(response.body, 'calories')
+
+        const id = 1
+        const food = "bananas"
+
+        let parsedFood = JSON.parse(response.body)
+
+        assert.equal(parsedFood.id, id)
+        assert.equal(parsedFood.food_name, food)
+        assert.ok(parsedFood.created_at)
         done()
       })
     })
