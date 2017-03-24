@@ -1,6 +1,6 @@
-# This is the most **Important** code on GitHub
+# This s the Most **Important** Code on GitHub
 
-You will probably remember this moment for the rest of your life. It's the second you finally got to experience this earth-shattering food/calories API for the very first time. #blessed
+You will probably remember this day for the rest of your life: it's the day you finally get to experience this earth-shattering food/calories API for the very first time. #blessed
 
 This database has over two distinct foods with their corresponding calories, and that number will inevitably continue to grow (if you test the POST endpoint).
 
