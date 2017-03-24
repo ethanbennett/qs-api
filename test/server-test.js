@@ -43,7 +43,11 @@ describe ('Server', () => {
       this.request.delete('/api/foods/1', (error, response) => {
         if (error) { done(error) }
         assert.equal(response.statusCode, 200)
-        done()
+        database.raw(`SELECT * FROM FOODS`
+          ).then((foods) => {
+          assert.equal(foods.rows.length, 1)
+          done()
+        })
       })
     })
   })
@@ -62,17 +66,17 @@ describe ('Server', () => {
       })
     })
 
-    xit('should receive and store data', (done) => {
-      const foodie = {food: { food_name: 'pineapple', calories: 10 }}
-      this.request.post('/api/foods', { form: foodie }, (error, response) => {
-        if (error) { done(error) }
-        // console.log(food)
-        console.log(database)
-        const secretCount = Object.keys(app.locals.foods).length
-        assert.equal(secretCount, 1)
-        done()
-      })
-    })
+    // xit('should receive and store data', (done) => {
+    //   const foodie = {food: { food_name: 'pineapple', calories: 10 }}
+    //   this.request.post('/api/foods', { form: foodie }, (error, response) => {
+    //     if (error) { done(error) }
+    //     // console.log(food)
+    //     console.log(database)
+    //     const secretCount = Object.keys(app.locals.foods).length
+    //     assert.equal(secretCount, 1)
+    //     done()
+    //   })
+    // })
   })
 
   describe('PUT /api/foods/:name', () => {
