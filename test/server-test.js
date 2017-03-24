@@ -27,17 +27,21 @@ describe ('Server', () => {
   })
 
   describe('DELETE /api/foods/:name', () => {
-    beforeEach(() => {
-      app.locals.foods = {
-        "apple": 10
-      }
+    beforeEach((done) => {
+      database.raw(
+        'INSERT INTO foods (food_name, calories , created_at) VALUES (?, ?, ?)',
+        ["bananas", "90", new Date]
+      ).then(() => done());
+    })
+
+    afterEach((done) => {
+      database.raw('TRUNCATE foods RESTART IDENTITY')
+      .then(() => done());
     })
 
     it('should delete a food', (done) => {
-      this.request.delete('/api/foods/apple', (error, response) => {
+      this.request.delete('/api/foods/1', (error, response) => {
         if (error) { done(error) }
-        const secretCount = Object.keys(app.locals.foods).length
-        assert.equal(secretCount, 0)
         assert.equal(response.statusCode, 200)
         done()
       })
