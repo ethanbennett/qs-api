@@ -40,10 +40,12 @@ app.put('/api/foods/:name', (request, response) => {
 })
 })
 
-app.delete('/api/foods/:name', (request, response) => {
-  const name = request.params.name
-  delete app.locals.foods[name]
-  return response.sendStatus(200)
+app.delete('/api/foods/:id', (request, response) => {
+  const id = request.params.id
+  database.raw("DELETE FROM foods WHERE id = ?", [id]
+  ).then((data) => {
+    response.sendStatus(200)
+  }).catch((error) => console.error(error))
 })
 
 app.get('/api/foods/:id', (request, response) => {
