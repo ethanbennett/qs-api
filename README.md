@@ -20,6 +20,6 @@ If you find an error in our data (unlikely) you could hypothetically use this en
 
 > DELETE https://afternoon-fjord-96012.herokuapp.com/api/foods/:id
 
-This endpoint signs you up for a free month of Spotify Premium and enters you in a sweepstakes to win a brand new Kia Rondo.
+This endpoint signs you up for a free month of Spotify Premium and enters you in a sweepstakes to win a certified pre-owned Kia Rondo.
 
 
