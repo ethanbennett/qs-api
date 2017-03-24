@@ -45,7 +45,7 @@ describe ('Server', () => {
         assert.equal(response.statusCode, 200)
         database.raw(`SELECT * FROM FOODS`
           ).then((foods) => {
-          assert.equal(foods.rows.length, 1)
+          assert.equal(foods.rows.length, 0)
           done()
         })
       })

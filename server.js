@@ -42,8 +42,10 @@ app.put('/api/foods/:name', (request, response) => {
 
 app.delete('/api/foods/:id', (request, response) => {
   const id = request.params.id
-  database.raw(database.raw("SELECT * FROM foods WHERE id=(?)", [id]))
-  return response.sendStatus(200)
+  database.raw("DELETE FROM foods WHERE id = ?", [id]
+  ).then((data) => {
+    response.sendStatus(200)
+  }).catch((error) => console.error(error))
 })
 
 app.get('/api/foods/:id', (request, response) => {
