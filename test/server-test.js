@@ -28,6 +28,11 @@ describe ('Server', () => {
 
   describe('DELETE /api/foods/:name', () => {
     beforeEach((done) => {
+      database.raw('TRUNCATE foods RESTART IDENTITY')
+      .then(() => done());
+    })
+
+    beforeEach((done) => {
       database.raw(
         'INSERT INTO foods (food_name, calories , created_at) VALUES (?, ?, ?)',
         ["bananas", "90", new Date]
@@ -43,7 +48,7 @@ describe ('Server', () => {
       this.request.delete('/api/foods/1', (error, response) => {
         if (error) { done(error) }
         assert.equal(response.statusCode, 200)
-        database.raw(`SELECT * FROM FOODS`
+        database.raw("DELETE FROM foods WHERE id = 1"
           ).then((foods) => {
           assert.equal(foods.rows.length, 0)
           done()
