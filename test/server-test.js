@@ -27,10 +27,6 @@ describe ('Server', () => {
   })
 
   describe('DELETE /api/foods/:name', () => {
-    beforeEach((done) => {
-      database.raw('TRUNCATE foods RESTART IDENTITY')
-      .then(() => done());
-    })
 
     beforeEach((done) => {
       database.raw(
@@ -71,34 +67,41 @@ describe ('Server', () => {
       })
     })
 
-    // xit('should receive and store data', (done) => {
-    //   const foodie = {food: { food_name: 'pineapple', calories: 10 }}
-    //   this.request.post('/api/foods', { form: foodie }, (error, response) => {
-    //     if (error) { done(error) }
-    //     // console.log(food)
-    //     console.log(database)
-    //     const secretCount = Object.keys(app.locals.foods).length
-    //     assert.equal(secretCount, 1)
-    //     done()
-    //   })
-    // })
+    it('should receive and store data', (done) => {
+      const foodie = {food: { food_name: 'pineapple', calories: 10 }}
+      this.request.post('/api/foods', { form: foodie }, (error, response) => {
+        if (error) { done(error) }
+        database.raw('select * from foods where food_name=?', [foodie.food.food_name])
+        .then((data) => {
+          assert.equal(data.rows.length, 1)
+        })
+        done()
+      })
+    })
   })
 
   describe('PUT /api/foods/:name', () => {
-    beforeEach(() => {
-      app.locals.foods = {
-        "apple": 10
-      }
+    beforeEach((done) => {
+      database.raw(
+        'INSERT INTO foods (food_name, calories , created_at) VALUES (?, ?, ?)',
+        ["bananas", "9", new Date]
+      ).then(() => done());
+    })
+
+    afterEach((done) => {
+      database.raw('TRUNCATE foods RESTART IDENTITY')
+      .then(() => done());
     })
 
     it('should properly edit an apple', (done) => {
       const food = { name: 'pinecone', calories: '10' }
-      this.request.put('/api/foods/apple', { json: food }, (error, response) => {
+      this.request.put('/api/foods/bananas', { json: food }, (error, response) => {
         if (error) { done(error) }
-        assert.equal(response.statusCode, 201)
-        assert.include(JSON.stringify(response.body), 'pinecone')
-        assert.include(JSON.stringify(response.body), '10')
-        assert.notInclude(JSON.stringify(response.body), 'apple')
+        assert.equal(response.statusCode, 200)
+        database.raw('select * from foods where food_name=?', [food.name])
+        .then((data) => {
+          assert.equal(data.rows.length, 1)
+        })
         done()
       })
     })

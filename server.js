@@ -4,6 +4,7 @@ const bodyParser = require('body-parser')
 const environment = process.env.NODE_ENV || 'development';
 const configuration = require('./knexfile')[environment];
 const database = require('knex')(configuration);
+const AppController = require('./lib/controllers/app-controller')
 
 app.set('port', process.env.PORT || 3000)
 app.locals.title = 'Quantified Self'
@@ -14,50 +15,13 @@ app.get('/', (request, response) => {
   response.send(app.locals.title)
 })
 
-app.post('/api/foods', (request, response) => {
-  const name = request.body.food.food_name
-  const calories = request.body.food.calories
-  console.log(name)
-  console.log(calories)
-  database.raw(
-    'INSERT INTO foods (food_name, calories , created_at) VALUES (?, ?, ?)',
-    [name, calories, new Date]
-  ).then((data) => { 
-    console.log(data)
-    response.sendStatus(200)
-  }).catch((error) => console.error(error))
-  
-})
+app.post('/api/foods', AppController.create)
 
-app.put('/api/foods/:name', (request, response) => {
-  const newName = request.body.name
-  const name = request.params.name
-  const calories = request.body.calories
-  app.locals.foods[newName] = calories
-  delete app.locals.foods[name]
-  response.status(201).json({
-    newName, calories
-})
-})
+app.put('/api/foods/:name', AppController.update)
 
-app.delete('/api/foods/:id', (request, response) => {
-  const id = request.params.id
-  database.raw("DELETE FROM foods WHERE id = ?", [id]
-  ).then((data) => {
-    response.sendStatus(200)
-  }).catch((error) => console.error(error))
-})
+app.delete('/api/foods/:id', AppController.deleteEntry)
 
-app.get('/api/foods/:id', (request, response) => {
-  const name = request.params.id
-  database.raw("SELECT * FROM foods WHERE id=?", [name])
-  .then((data) => {
-    if (!data.rowCount) {
-      return response.sendStatus(404)
-    }
-    response.status(200).json(data.rows[0])
-  })
-})
+app.get('/api/foods/:id', AppController.getAll)
 
 if (!module.parent) {
   app.listen(app.get('port'), () => {
